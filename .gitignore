@@ -1,0 +1,10 @@
+*.jpg
+*.avi
+*.env
+api/__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+.idea/
+node_modules/
+myenv/
