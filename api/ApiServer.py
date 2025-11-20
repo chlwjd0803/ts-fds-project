@@ -4,7 +4,7 @@ import uvicorn
 import cv2
 import numpy as np
 
-from SpeakerCommand import SpeakerCommand
+from HttpResponseJson import HttpResponseJson
 
 app = FastAPI()
 
@@ -32,37 +32,45 @@ async def get_status():
 # 라즈베리 서버 확인 API
 @app.get("/api/server_status")
 async def get_api_status():
-    """서버 API 상태 정보 제공"""
-    return {
-        "status": "200", 
-        "message": "라즈베리 서버 준비 완료"
-        }
+    """
+    서버 API 상태 정보 제공
+
+    라즈베리파이 서버가 정상적으로 동작하는지에 대해 보여줍니다.
+    
+    """
+    return HttpResponseJson(
+            status = 200, 
+            message= "라즈베리 서버 준비 완료"
+            )
 
 # 라즈베리에 연결된 웹캠 상태 확인 API
 @app.get("/api/webcam_status")
 async def get_webcam_status():
     
-    # **웹캠 장치 열기 시도**
-    # 0은 보통 기본 웹캠 인덱스를 의미합니다. 다른 장치 인덱스(1, 2 등)나 
-    # 장치 경로(예: "/dev/video0")를 시도해 볼 수도 있습니다.
+    """
+    서버 외부장치(웹캠) 상태 정보 제공
+
+    라즈베리파이에 연결되어있는 웹캠 장치가 정상적으로 연결되어있는지 확인합니다.
+    
+    """
     cap = cv2.VideoCapture(0) 
     
     # **웹캠이 성공적으로 열렸는지 확인**
     if cap.isOpened():
-        
-        # 열기에 성공
+        # 웹캠이 연결되어있음
         cap.release()
+
+        return HttpResponseJson(
+            status = 200, 
+            message= "웹캠이 정상적으로 연결되었으며 접근 가능합니다."
+            )
         
-        return {
-            "status": "200",
-            "message": "웹캠이 정상적으로 연결되었으며 접근 가능합니다."
-        }
     else:
-        # 열기에 실패
-        return {
-            "status": "500",
-            "message": "웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
-        }
+        # 웹캠이 연결되어있지않음
+        return HttpResponseJson(
+            status = 500, 
+            message= "웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
+            )
 
 # 중앙(AI)서버 측에서 요청을 보내야할 API -> 중앙서버와 라즈베리서버의 역할이 분리됨
 # @app.post("/api/command")
@@ -82,9 +90,20 @@ async def get_webcam_status():
 
 
 # 2. 웹소켓 엔드포인트 구현 (실시간 영상 수신)
+# 해당 부분은 일단 구현 상 보류합니다.
 
 @app.websocket("/ws/stream")
 async def websocket_endpoint(websocket: WebSocket):
+
+    """
+    중앙서버(AI서버)와의 WebSocket 실시간 영상 스트리밍 송수신
+
+    중앙서버로 웹캠으로 촬영한 영상을 프레임단위로 잘라 전송합니다.
+
+    1. 연결 수립: 클라이언트(엣지 컴퓨터)에서 WebSocket 연결 요청 시 인증 및 연결 승인 처리
+    2. 영상 송신: 웹캠에서 캡처한 프레임을 JPEG로 인코딩하여 WebSocket을 통해 중앙서버로 전송
+    
+    """
     
     # 연결 인증 및 식별 모의: 연결 수립 시 인증 토큰 검증 로직 추가 가능
     await websocket.accept()

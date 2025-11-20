@@ -55,6 +55,7 @@ def capture_and_save_frames():
             
             # 초당 10프레임 전송을 모의하기 위해 sleep 시간을 조정합니다.
             # 1초 / 10프레임 = 0.1초 (전송 시간 고려)
+            # 평균 17프레임으로 저장 시도
             time.sleep(0.05) 
             
             index += 1
