@@ -11,7 +11,7 @@ app = FastAPI()
 # 1. REST API 엔드포인트 구현 (기본 정보 및 엣지 명령 전송 모의)
 
 
-# 테스트 api
+# 테스트
 @app.get("/", response_class=HTMLResponse)
 async def get_status():
     """서버 상태 확인용 기본 페이지 (선택 사항)"""
@@ -21,34 +21,65 @@ async def get_status():
             <title>AI Server Status</title>
         </head>
         <body>
-            <h1>AI 서버가 정상적으로 작동 중입니다.</h1>
+            <h1>라즈베리 서버가 정상적으로 작동 중입니다.</h1>
             <p>WebSocket: ws://localhost:8000/ws/stream</p>
             <p>REST API: http://localhost:8000/api/status</p>
         </body>
     </html>
     """
 
+
 # 라즈베리 서버 확인 API
-@app.get("/api/status")
+@app.get("/api/server_status")
 async def get_api_status():
     """서버 API 상태 정보 제공"""
-    return {"status": "ok", "message": "라즈베리 서버 준비 완료"}
+    return {
+        "status": "200", 
+        "message": "라즈베리 서버 준비 완료"
+        }
+
+# 라즈베리에 연결된 웹캠 상태 확인 API
+@app.get("/api/webcam_status")
+async def get_webcam_status():
+    
+    # **웹캠 장치 열기 시도**
+    # 0은 보통 기본 웹캠 인덱스를 의미합니다. 다른 장치 인덱스(1, 2 등)나 
+    # 장치 경로(예: "/dev/video0")를 시도해 볼 수도 있습니다.
+    cap = cv2.VideoCapture(0) 
+    
+    # **웹캠이 성공적으로 열렸는지 확인**
+    if cap.isOpened():
+        
+        # 열기에 성공
+        cap.release()
+        
+        return {
+            "status": "200",
+            "message": "웹캠이 정상적으로 연결되었으며 접근 가능합니다."
+        }
+    else:
+        # 열기에 실패
+        return {
+            "status": "500",
+            "message": "웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
+        }
+
+# 중앙(AI)서버 측에서 요청을 보내야할 API -> 중앙서버와 라즈베리서버의 역할이 분리됨
+# @app.post("/api/command")
+# async def send_control_command(command: SpeakerCommand):
+#     """
+#     엣지 컴퓨터 명령 전송(REST API) 모의. 
+#     AI 분석 결과를 스피커 제어용 명령으로 변환 후 엣지로 전송합니다. 
+#     """
+#     print(f"--- IOT 제어 명령 수신 ---")
+#     print(f"수신된 명령: {command}")
+    
+#     # 실제 구현: MQTT Publish 로직 또는 다른 로직 수행
+#     # 현재는 모의 구현으로 단순 받았던 JSON을 그대로 반환합니다.
+    
+#     return {"result": "success", "command_sent": command}
 
 
-# AI서버 측에서 요청을 보내야할 API
-@app.post("/api/command")
-async def send_control_command(command: SpeakerCommand):
-    """
-    엣지 컴퓨터 명령 전송(REST API) 모의. 
-    AI 분석 결과를 스피커 제어용 명령으로 변환 후 엣지로 전송합니다. 
-    """
-    print(f"--- IOT 제어 명령 수신 ---")
-    print(f"수신된 명령: {command}")
-    
-    # 실제 구현: MQTT Publish 로직 또는 다른 로직 수행
-    # 현재는 모의 구현으로 단순 받았던 JSON을 그대로 반환합니다.
-    
-    return {"result": "success", "command_sent": command}
 
 # 2. 웹소켓 엔드포인트 구현 (실시간 영상 수신)
 

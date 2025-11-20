@@ -26,9 +26,7 @@ def capture_and_save_frames():
         print(f"오류: {CAMERA_INDEX}번 웹캠을 열 수 없습니다.")
         # sys.exit(1)
         return # 함수 종료
-
-    print("웹캠 초기화 완료. 프레임 캡처를 시작합니다. (q 키를 누르면 종료)")
-    
+        
     frame_count = 0
     start_time = time.time()
     index = 0
