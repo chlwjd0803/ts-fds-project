@@ -9,9 +9,9 @@
 
 | 분류 | 기능 설명 | 관련 파일 |
 | :--- | :--- | :--- |
-| **실시간 스트리밍** | **OpenCV**를 사용하여 웹캠 프레임을 **JPEG**로 인코딩한 후, **WebSocket**을 통해 중앙 서버로 실시간 전송합니다. | `ApiServer.py`, `WebsocketClient.py` |
-| **상태 확인 API** | 서버 동작 상태 및 웹캠 연결 상태를 확인하는 엔드포인트 제공. | `ApiServer.py` |
-| **제어 API** | 프레임 전송 **시작/일시 중지** 및 실시간 **프레임 속도(FPS)**를 동적으로 제어합니다 (15~30 FPS 범위 허용). | `ApiServer.py` |
+| **웹소켓 실시간 스트리밍** | **OpenCV**를 사용하여 웹캠 프레임을 **JPEG**로 인코딩한 후, **WebSocket**을 통해 중앙 서버로 실시간 전송합니다. | `Api_Websocket.py`, `WebsocketClient.py` |
+| **제어 API** | 카메라와 스트리밍에 대한 제어와 관련하여 Fast API를 구현하였습니다. | `Api_Websocket.py`, `Api_Rtsp` |
+| **RTSP 실시간 스트리밍** | RTSP 프로토콜을 통한 실시간 스트리밍 모듈을 분리하여 구현하였습니다. | `Api_Rtsp` |
 
 ---
 
@@ -21,12 +21,15 @@
 * **프레임워크:** FastAPI
 * **영상 처리:** OpenCV
 * **서버:** uvicorn (ASGI 서버)
+* **데이터전송:** Websockets, RTSP
 
 ---
 
 ## 🗓️ 진행 현황 (Development Log)
 
 ### **[11월 24일]** 서버 API 및 클라이언트 구현
+
+* **RTSP 전송 모듈 구현**
 * **FastAPI 엣지 서버 API 구현 완료**:
     * `POST /api/frame/start`: 프레임 전송 시작/재개 기능 구현.
     * `POST /api/frame/stop`: 프레임 전송 일시 중지 기능 구현.
@@ -53,6 +56,7 @@
 | `lsusb` | USB 포트에 연결된 기기 목록 확인 |
 | `fswebcam image.jpg` | 웹캠으로 사진 촬영 명령어 (테스트용) |
 | `sudo shutdown now` | 라즈베리파이 즉시 종료 |
+| `mediamtx mediamtx.yml` | RTSP 서버를 열기위한 필수 실행 명령어 |
 
 ---
 

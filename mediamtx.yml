@@ -1,0 +1,10 @@
+rtspAddress: :8554
+
+# --- 새로 추가/수정할 부분 ---
+paths:
+  # FFmpeg이 푸시할 경로를 정의합니다.
+  # "live/stream"이라는 이름으로 들어오는 모든 푸시(source: "publisher")를 허용합니다.
+  live/stream:
+    source: publisher
+    # source: publisher -> 외부에서 이 경로로 영상을 푸시하는 것을 허용하라는 의미입니다.
+
