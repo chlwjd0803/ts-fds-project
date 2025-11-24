@@ -22,7 +22,7 @@ async def start_rtsp_transmission():
             status_code=status.HTTP_200_OK,
             content=HttpResponseJson(
                 status=200, 
-                message=f"RTSP 스트리밍이 시작되었습니다. URL: {RTSP_MANAGER.rtsp_url}"
+                message=f"RTSP 스트리밍이 시작되었습니다. URL: rtsp://<요청주소>:8554/live/stream"
             ).model_dump()
         )
     else :

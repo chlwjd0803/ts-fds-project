@@ -4,6 +4,8 @@ import signal
 import time
 from typing import Optional
 
+# 본 코드는 GEMINI가 작성하였습니다.
+
 class RtspStreamManager:
     """
     웹캠 RTSP 스트리밍을 위한 FFmpeg 프로세스를 관리하는 클래스입니다.
