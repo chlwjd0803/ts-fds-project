@@ -144,6 +144,32 @@ async def stop_frame_transmission():
                 message="프레임 전송이 이미 중지된 상태입니다. 현재 상태 : " + ("전송중" if is_streaming else "일시중지")
             ).model_dump()
         )
+    
+@app.post("/api/frame/rate/{new_rate}")
+async def set_frame_rate(new_rate: int):
+    """
+    웹캠 프레임 전송 속도 설정
+
+    new_rate: 초당 프레임 수 (FPS)로, 1에서 60 사이의 값을 허용합니다.
+    """
+    global frame_rate
+    if 15 <= new_rate <= 30:
+        frame_rate = new_rate
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=HttpResponseJson(
+                status=200, 
+                message=f"프레임 전송 속도가 {new_rate} FPS로 설정되었습니다."
+            ).model_dump()
+        )
+    else:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=HttpResponseJson(
+                status=400, 
+                message="잘못된 프레임 속도 값입니다. 15에서 30 사이의 값을 입력하세요."
+            ).model_dump()
+        )
 
 
 # 2. 웹소켓 엔드포인트 구현 (실시간 영상 수신)
