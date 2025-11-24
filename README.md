@@ -1,27 +1,63 @@
-# 진행현황
+# 🚀 낙상 감지 시스템 Raspberry Pi 서버 프로젝트
 
-## 11월 19일
-- 라즈베리파이 기본 세팅 및 명령어 저장
-- vscode 원격 연결
-- 웹캠 연결
+## 💡 프로젝트 개요 (Project Overview)
+본 프로젝트는 **라즈베리파이(Raspberry Pi)**를 엣지 디바이스로 활용하여 연결된 웹캠의 실시간 영상 스트림을 중앙 서버로 전송하는 시스템을 구현합니다. **FastAPI**를 기반으로 구축되어, 안정적인 **WebSocket** 기반의 고속 프레임 송신 채널과 서버 기능을 제어하기 위한 **REST API** 엔드포인트를 제공합니다.
 
-## 11월 20일
-- 웹캠 프레임단위 연속촬영 후 저장
+---
 
+## ✨ 주요 기능 (Key Features)
 
+| 분류 | 기능 설명 | 관련 파일 |
+| :--- | :--- | :--- |
+| **실시간 스트리밍** | **OpenCV**를 사용하여 웹캠 프레임을 **JPEG**로 인코딩한 후, **WebSocket**을 통해 중앙 서버로 실시간 전송합니다. | `ApiServer.py`, `WebsocketClient.py` |
+| **상태 확인 API** | 서버 동작 상태 및 웹캠 연결 상태를 확인하는 엔드포인트 제공. | `ApiServer.py` |
+| **제어 API** | 프레임 전송 **시작/일시 중지** 및 실시간 **프레임 속도(FPS)**를 동적으로 제어합니다 (15~30 FPS 범위 허용). | `ApiServer.py` |
 
-# 주요 명령어
+---
 
-python -m venv myenv
-source myenv/bin/activate
-deactiavate
-가상환경 만들기 및 실행, 종료
+## 🛠️ 기술 스택 (Tech Stack)
 
-lsusb
-명령어를 통해 기기들이 몇번 포트에 연결되어 있는지 확인
+* **언어:** Python
+* **프레임워크:** FastAPI
+* **영상 처리:** OpenCV
+* **서버:** uvicorn (ASGI 서버)
 
-fswebcam image.jpg
-사진 촬영 명령어
+---
 
-sudo shutdown now
-종료 명령어
+## 🗓️ 진행 현황 (Development Log)
+
+### **[11월 24일]** 서버 API 및 클라이언트 구현
+* **FastAPI 엣지 서버 API 구현 완료**:
+    * `POST /api/frame/start`: 프레임 전송 시작/재개 기능 구현.
+    * `POST /api/frame/stop`: 프레임 전송 일시 중지 기능 구현.
+    * `POST /api/frame/rate/{new_rate}`: 프레임 전송 속도 동적 변경 기능 구현.
+    * `GET /ws/stream`: WebSocket을 통한 실시간 영상 송신 엔드포인트 구현.
+* **WebSocket 클라이언트 모듈 구현** (중앙 서버 측 모의 코드).
+
+### **[11월 20일]** 웹캠 연속 촬영 기능 개발
+* OpenCV를 활용한 웹캠 프레임 단위 연속 촬영 및 파일 저장 기능 구현.
+
+### **[11월 19일]** 라즈베리파이 환경 설정
+* 라즈베리파이 기본 세팅 및 명령어 저장.
+* VS Code 원격 연결 및 웹캠 연결 확인 완료.
+
+---
+
+## 💻 주요 명령어 (Key Commands)
+
+| 명령어 | 설명 |
+| :--- | :--- |
+| `python -m venv myenv` | Python 가상 환경 생성 |
+| `source myenv/bin/activate` | 가상 환경 실행 |
+| `deactiavate` | 가상 환경 종료 |
+| `lsusb` | USB 포트에 연결된 기기 목록 확인 |
+| `fswebcam image.jpg` | 웹캠으로 사진 촬영 명령어 (테스트용) |
+| `sudo shutdown now` | 라즈베리파이 즉시 종료 |
+
+---
+
+## ⚙️ 서버 실행 (Server Execution)
+
+```bash
+# ApiServer.py 실행 (Uvicorn 사용)
+uvicorn ApiServer:app --host 0.0.0.0 --port 8080
