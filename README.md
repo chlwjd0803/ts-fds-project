@@ -65,3 +65,26 @@
 ```bash
 # ApiServer.py 실행 (Uvicorn 사용)
 uvicorn ApiServer:app --host 0.0.0.0 --port 8080
+```
+
+
+## RTSP 필수 세팅 과정
+```
+sudo apt update
+sudo apt install ffmpeg
+
+# MediaMTX 최신 버전 다운로드 (ARMv7 아키텍처용)
+# 주소는 최신 버전에 따라 달라질 수 있으므로, 공식 GitHub 페이지에서 확인하거나 아래 명령어를 사용해 보세요.
+wget https://github.com/bluenviron/mediamtx/releases/download/v1.7.0/mediamtx_v1.7.0_linux_armv7.tar.gz
+
+# 압축 해제
+tar -zxvf mediamtx_v1.7.0_linux_armv7.tar.gz
+
+# 압축 해제 후 생성된 실행 파일을 원하는 디렉토리로 이동 (예: /usr/local/bin)
+sudo mv mediamtx /usr/local/bin/
+
+# mediamtx.yml 첨부되어있는 것처럼 수정
+# 이후 실행
+
+mediamtx mediamtx.yml
+```
