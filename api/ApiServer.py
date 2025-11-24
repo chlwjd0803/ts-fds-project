@@ -1,5 +1,5 @@
-from fastapi import FastAPI, WebSocket, Request, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, WebSocket, Request, HTTPException, status
+from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 import cv2
 import numpy as np
@@ -14,7 +14,7 @@ app = FastAPI()
 # 테스트
 @app.get("/", response_class=HTMLResponse)
 async def get_status():
-    """서버 상태 확인용 기본 페이지 (선택 사항)"""
+    """서버 상태 확인용 기본 페이지"""
     return """
     <html>
         <head>
@@ -38,10 +38,13 @@ async def get_api_status():
     라즈베리파이 서버가 정상적으로 동작하는지에 대해 보여줍니다.
     
     """
-    return HttpResponseJson(
-            status = 200, 
-            message= "라즈베리 서버 준비 완료"
-            )
+    return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=HttpResponseJson(
+                status=200, 
+                message="라즈베리 서버 준비완료"
+            ).model_dump()
+        )
 
 # 라즈베리에 연결된 웹캠 상태 확인 API
 @app.get("/api/webcam_status")
@@ -60,17 +63,23 @@ async def get_webcam_status():
         # 웹캠이 연결되어있음
         cap.release()
 
-        return HttpResponseJson(
-            status = 200, 
-            message= "웹캠이 정상적으로 연결되었으며 접근 가능합니다."
-            )
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=HttpResponseJson(
+                status=200, 
+                message="웹캠이 정상적으로 연결되었으며 접근 가능합니다."
+            ).model_dump()
+        )
         
     else:
         # 웹캠이 연결되어있지않음
-        return HttpResponseJson(
-            status = 500, 
-            message= "웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
-            )
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=HttpResponseJson(
+                status=500, # 응답 본문에 포함될 내부 상태 코드
+                message="웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
+            ).model_dump()
+        )
 
 # 중앙(AI)서버 측에서 요청을 보내야할 API -> 중앙서버와 라즈베리서버의 역할이 분리됨
 # @app.post("/api/command")
@@ -146,4 +155,4 @@ async def websocket_endpoint(websocket: WebSocket):
 
 if __name__ == "__main__":
     # 서버 실행 명령어: uvicorn ai_server:app --reload
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)

@@ -27,7 +27,6 @@ def capture_and_save_frames():
         # sys.exit(1)
         return # 함수 종료
         
-    frame_count = 0
     start_time = time.time()
     index = 0
     
@@ -51,7 +50,6 @@ def capture_and_save_frames():
             # 5. 프레임을 JPEG 파일로 저장
             cv2.imwrite(filename, image)
             
-            frame_count += 1
             
             # 초당 10프레임 전송을 모의하기 위해 sleep 시간을 조정합니다.
             # 1초 / 10프레임 = 0.1초 (전송 시간 고려)
@@ -73,8 +71,8 @@ def capture_and_save_frames():
         # cv2.destroyAllWindows()
         
         if duration > 0:
-            avg_fps = frame_count / duration
-            print(f"총 {frame_count}개 프레임 저장됨. 평균 FPS: {avg_fps:.2f}")
+            avg_fps = index / duration
+            print(f"총 {index}개 프레임 저장됨. 평균 FPS: {avg_fps:.2f}")
 
 
 if __name__ == "__main__":
