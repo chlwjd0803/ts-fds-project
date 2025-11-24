@@ -6,7 +6,7 @@ import time
 
 # --- 설정 정보 ---
 # 중앙 서버의 WebSocket 주소로 변경해야 합니다.
-NVR_SERVER_URL = "ws://localhost:8000/ws/stream" 
+NVR_SERVER_URL = "ws://localhost:8080/ws/stream" 
 # 카메라 고유 ID (IF-003 명세에 따라 전송해야 함)
 CAMERA_ID = "CAM-RASPBERRY-01" 
 # 캡처 인덱스 (0으로 가정)
