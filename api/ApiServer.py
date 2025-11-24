@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 import uvicorn
 import cv2
 import numpy as np
+import asyncio
 
 from HttpResponseJson import HttpResponseJson
 
@@ -135,54 +136,56 @@ async def stop_frame_transmission():
 
 @app.websocket("/ws/stream")
 async def websocket_endpoint(websocket: WebSocket):
-
     """
-    중앙서버(AI서버)와의 WebSocket 실시간 영상 스트리밍 송수신
-
-    중앙서버로 웹캠으로 촬영한 영상을 프레임단위로 잘라 전송합니다.
-
-    1. 연결 수립: 클라이언트(엣지 컴퓨터)에서 WebSocket 연결 요청 시 인증 및 연결 승인 처리
-    2. 영상 송신: 웹캠에서 캡처한 프레임을 JPEG로 인코딩하여 WebSocket을 통해 중앙서버로 전송
-    
+    RPi 서버 -> 중앙 서버로 WebSocket 실시간 영상 프레임을 송신합니다.
     """
+    global is_streaming
     
-    # 연결 인증 및 식별 모의: 연결 수립 시 인증 토큰 검증 로직 추가 가능
+    # 웹소켓 연결 수락 (중앙 서버와의 연결)
     await websocket.accept()
+    print(f"\n✅ 중앙 서버의 웹소켓 연결 수락: {websocket.client}")
     
-    # 웹캠 연결상태 관리: 연결 승인
-    print(f"\n✅ 새로운 웹캠 연결 수립: {websocket.client}")
+    # 웹캠 캡처 객체 생성
+    cap = cv2.VideoCapture(0) 
     
+    # 웹캠 연결 확인
+    if not cap.isOpened():
+        print("웹캠 연결을 찾을 수 없습니다. WebSocket 연결을 종료합니다.")
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR, reason="Webcam not available")
+        return
+
     try:
         while True:
-            # 웹캠 영상정보 수신: 클라이언트로부터 이진 데이터(JPEG) 수신
-            image_data = await websocket.receive_bytes()
-            
-            # 💡 서버 CPU 부하 지점: JPEG 디코딩 및 AI 분석
-            
-            # 바이트 데이터를 NumPy 배열로 변환
-            nparr = np.frombuffer(image_data, np.uint8)
-            # JPEG 디코딩
-            frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-
-            if frame is not None:
-                # 영상 데이터 수신(websocket) 
-                print(f"프레임 수신 성공. 크기: {len(image_data) / 1024:.2f} KB, 해상도: {frame.shape[1]}x{frame.shape[0]}")
+            # 1. REST API로 제어된 전송 상태 확인
+            if is_streaming:
+                # 2. 웹캠에서 프레임 읽기
+                ret, frame = cap.read()
                 
-                # 💡 YOLO 객체 탐지 및 CLIP 상황 분석 로직 추가 위치 
-                # analyze_result = yolo_model.predict(frame)
-                # ...
-                
-            else:
-                print("오류: 수신된 데이터를 프레임으로 디코딩할 수 없습니다.")
+                if ret:
+                    # 3. 프레임을 JPEG로 인코딩 (바이트 데이터 준비)
+                    # 품질을 50으로 설정하여 대역폭을 절약합니다. (0~100)
+                    encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 50]
+                    ret, buffer = cv2.imencode('.jpg', frame, encode_param)
+                    image_data = buffer.tobytes()
+                    
+                    # 4. 중앙 서버로 데이터 "송신"
+                    await websocket.send_bytes(image_data)
 
+                else:
+                    pass
+            
+            # 전송 속도 조절: 24fps 세팅
+            await asyncio.sleep(0.041666) 
+            
     except Exception as e:
-        # 웹캠 연결상태 관리: 비정상적 단절 시 예외 처리 및 세션 정리 [cite: 1, 2]
-        print(f"\n❌ 웹캠 연결 종료/오류 발생: {websocket.client} - {e}")
+        # 웹소켓 연결 단절, 예외 처리
+        print(f"\n❌ 웹소켓 연결 종료/오류 발생: {websocket.client} - {e}")
         
     finally:
-        # 연결 종료 처리
+        # 웹캠 객체 해제 및 웹소켓 연결 종료
+        cap.release()
         await websocket.close()
-        print(f"연결 종료 처리 완료: {websocket.client}")
+        print(f"연결 종료 및 웹캠 해제 완료: {websocket.client}")
 
 
 if __name__ == "__main__":
