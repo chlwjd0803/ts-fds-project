@@ -81,7 +81,7 @@ async def get_webcam_status():
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=HttpResponseJson(
-                status=500, # 응답 본문에 포함될 내부 상태 코드
+                status=500,
                 message="웹캠 연결을 찾을 수 없거나 접근할 수 없습니다 (인덱스 0)."
             ).model_dump()
         )
@@ -89,6 +89,13 @@ async def get_webcam_status():
 # **새로운 제어 API:** 프레임 전송 시작 or 재개
 @app.post("/api/frame/start")
 async def start_frame_transmission():
+    """
+    웹캠 프레임 전송 시작 또는 재개
+
+    라즈베리파이에 연결되어있는 웹캠 장치가 프레임을 보내도록 설정합니다.
+
+    만약 이미 전송 중 상태라면 오류메시지를 반환합니다.
+    """
     global is_streaming
     if not is_streaming:
         is_streaming = True
@@ -103,7 +110,7 @@ async def start_frame_transmission():
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=HttpResponseJson(
-                status=200, 
+                status=400, 
                 message="프레임 전송이 이미 실행 중입니다. 현재 상태 : " + ("전송중" if is_streaming else "일시중지")
             ).model_dump()
         )
@@ -111,6 +118,13 @@ async def start_frame_transmission():
 # **새로운 제어 API:** 프레임 전송 일시 중지
 @app.post("/api/frame/stop")
 async def stop_frame_transmission():
+    """
+    웹캠 프레임 전송 중지
+
+    라즈베리파이에 연결되어있는 웹캠 장치가 프레임을 보내는것을 중단하도록 설정합니다.
+
+    만약 이미 중지 상태라면 오류메시지를 반환합니다.
+    """
     global is_streaming
     if is_streaming:
         is_streaming = False
@@ -125,14 +139,13 @@ async def stop_frame_transmission():
         return JSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content=HttpResponseJson(
-                status=200, 
+                status=400, 
                 message="프레임 전송이 이미 중지된 상태입니다. 현재 상태 : " + ("전송중" if is_streaming else "일시중지")
             ).model_dump()
         )
 
 
 # 2. 웹소켓 엔드포인트 구현 (실시간 영상 수신)
-# 해당 부분은 일단 구현 상 보류합니다.
 
 @app.websocket("/ws/stream")
 async def websocket_endpoint(websocket: WebSocket):
