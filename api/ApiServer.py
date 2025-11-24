@@ -11,6 +11,7 @@ app = FastAPI()
 
 # 0. 관리 전역변수
 is_streaming = True  # 웹캠 스트리밍 상태 플래그
+frame_rate = 24  # 초기 프레임 전송 간격 (24fps)
 
 
 # 1. REST API 엔드포인트 구현 (기본 정보 및 엣지 명령 전송 모의)
@@ -153,6 +154,7 @@ async def websocket_endpoint(websocket: WebSocket):
     RPi 서버 -> 중앙 서버로 WebSocket 실시간 영상 프레임을 송신합니다.
     """
     global is_streaming
+    global frame_rate
     
     # 웹소켓 연결 수락 (중앙 서버와의 연결)
     await websocket.accept()
@@ -187,8 +189,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 else:
                     pass
             
-            # 전송 속도 조절: 24fps 세팅
-            await asyncio.sleep(0.041666) 
+            await asyncio.sleep(1/frame_rate) 
             
     except Exception as e:
         # 웹소켓 연결 단절, 예외 처리
