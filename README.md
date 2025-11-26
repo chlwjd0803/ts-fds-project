@@ -60,16 +60,8 @@
 
 ---
 
-## ⚙️ 서버 실행 (Server Execution)
-
-```bash
-# ApiServer.py 실행 (Uvicorn 사용)
-uvicorn ApiServer:app --host 0.0.0.0 --port 8080
-```
-
-
 ## RTSP 필수 세팅 과정
-```
+```bash
 sudo apt update
 sudo apt install ffmpeg
 
@@ -87,4 +79,23 @@ sudo mv mediamtx /usr/local/bin/
 # 이후 실행
 
 mediamtx mediamtx.yml
+```
+
+---
+
+## ⚙️ 백그라운드 실행 (Server Execution)
+
+```bash
+# ApiServer.py 실행 (Uvicorn 사용방법)
+uvicorn ApiServer:app --host 0.0.0.0 --port 8080
+
+# ssh 종료 이후에도 실행할 수 있게 하기위한 설치 과정
+sudo apt-get install screen
+
+screen <명령어> &
+screen python Api_Rstp.py &
+screen mediamtx mediamtx.yml &
+
+# 만약 ssh 연결을 끊고 다음에 재접속하여 프로세스를 확인할 때
+ps -ef
 ```
